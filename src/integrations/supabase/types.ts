@@ -86,6 +86,135 @@ export type Database = {
         }
         Relationships: []
       }
+      report_feedback: {
+        Row: {
+          comments: string | null
+          created_at: string
+          efficiency_rating: number | null
+          id: string
+          interview_available: boolean | null
+          report_id: string
+          satisfaction_rating: number
+          user_id: string
+          willingness_to_pay: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          efficiency_rating?: number | null
+          id?: string
+          interview_available?: boolean | null
+          report_id: string
+          satisfaction_rating: number
+          user_id: string
+          willingness_to_pay?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          efficiency_rating?: number | null
+          id?: string
+          interview_available?: boolean | null
+          report_id?: string
+          satisfaction_rating?: number
+          user_id?: string
+          willingness_to_pay?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_feedback_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "review_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_reports: {
+        Row: {
+          contract_id: string
+          contract_overview: Json | null
+          created_at: string
+          id: string
+          operator_id: string
+          overall_risk_level: string
+          risk_clauses: Json | null
+          suggestions: Json | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          contract_id: string
+          contract_overview?: Json | null
+          created_at?: string
+          id?: string
+          operator_id: string
+          overall_risk_level?: string
+          risk_clauses?: Json | null
+          suggestions?: Json | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          contract_overview?: Json | null
+          created_at?: string
+          id?: string
+          operator_id?: string
+          overall_risk_level?: string
+          risk_clauses?: Json | null
+          suggestions?: Json | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_reports_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suggestion_responses: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          reason: string | null
+          report_id: string
+          suggestion_index: number
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          report_id: string
+          suggestion_index: number
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          report_id?: string
+          suggestion_index?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_responses_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "review_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
