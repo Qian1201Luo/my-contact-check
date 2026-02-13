@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FileText, Upload, Clock, CheckCircle, Loader2, Scale, LogOut, Trash2 } from "lucide-react";
+import { FileText, Upload, Clock, CheckCircle, Loader2, Scale, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgreementGuard } from "@/hooks/useAgreementGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,14 +21,14 @@ interface Contract {
 const Dashboard = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, signOut } = useAuth();
+  const { checking, user } = useAgreementGuard();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!user) { navigate("/auth"); return; }
-    fetchContracts();
-  }, [user, navigate]);
+    if (!checking && user) fetchContracts();
+  }, [checking, user]);
 
   const fetchContracts = async () => {
     const { data, error } = await supabase
