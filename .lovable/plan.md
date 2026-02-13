@@ -114,3 +114,100 @@
 - **元素**：法律元素图标、盾牌安全标识、简洁现代的卡片式布局
 - **交互**：流畅的过渡动画，专业而不花哨
 
+---
+
+## 🔧 待优化项清单（优先级排序）
+
+### P0 - 核心功能缺失（影响验证闭环）
+
+#### 1. 48小时文件自动清理机制
+- **现状**：前端仅显示倒计时，后端无实际清理逻辑
+- **方案**：创建定时 Edge Function，每小时扫描已过期合同，删除 Storage 文件并更新 DB 状态
+- **涉及**：Edge Function + Cron 触发
+
+#### 2. 协议签署流程守卫
+- **现状**：Dashboard 和 Upload 页面未检查用户是否已签署协议
+- **方案**：在 Dashboard/Upload 页面加载时检查 `profiles.agreement_signed`，未签署则重定向到 `/agreement`
+- **涉及**：Dashboard.tsx, Upload.tsx
+
+#### 3. 文件上传大小校验
+- **现状**：前端提示"不超过20MB"但未做实际大小限制
+- **方案**：在 `handleUpload` 中增加 `file.size` 校验，超过 20MB 拒绝上传
+- **涉及**：Upload.tsx
+
+#### 4. 忘记密码/重置密码功能
+- **现状**：Auth 页面无密码找回入口
+- **方案**：利用认证系统的 `resetPasswordForEmail` + 密码重置页面
+- **涉及**：Auth.tsx, 新增 ResetPassword.tsx
+
+### P1 - 体验优化（提升用户感知）
+
+#### 5. 移动端响应式适配
+- **现状**：Dashboard 合同列表、Admin 页面在小屏幕下布局拥挤
+- **方案**：
+  - Dashboard 合同卡片改为垂直堆叠布局
+  - Admin 导航改为 Hamburger 菜单
+  - Report 页面建议按钮改为垂直排列
+- **涉及**：Dashboard.tsx, AdminQueue.tsx, Report.tsx, AdminAnalytics.tsx
+
+#### 6. 公共 Header/Layout 组件提取
+- **现状**：每个页面重复实现 header，代码冗余且风格不一致
+- **方案**：提取 `AppHeader` 和 `AdminHeader` 共享布局组件
+- **涉及**：新增 components/layout/AppHeader.tsx, AdminHeader.tsx
+
+#### 7. Report.tsx 组件拆分
+- **现状**：Report.tsx 已达 413 行，职责过多
+- **方案**：拆分为 ReportHeader, RiskClauseList, SuggestionList, FeedbackForm 等子组件
+- **涉及**：src/components/report/ 目录
+
+#### 8. 全局错误边界与网络异常处理
+- **现状**：多处 API 调用仅处理 happy path，网络断开或服务异常时无反馈
+- **方案**：
+  - 添加 React Error Boundary 组件
+  - API 调用统一加 error toast 提示
+  - 增加重试按钮
+- **涉及**：新增 ErrorBoundary.tsx, 各数据请求页面
+
+### P2 - 数据验证增强（支撑决策分析）
+
+#### 9. Admin 数据分析增强
+- **现状**：`totalUsers` 显示为 0（缺少 profiles 表的 admin 读取策略）、无趋势图表
+- **方案**：
+  - 添加 admin 可读 profiles 的 RLS 策略（仅 count）
+  - 增加合同提交趋势图（按日/周）
+  - 增加建议采纳/拒绝/讨论分布饼图
+  - Waitlist 来源渠道分布图
+- **涉及**：AdminAnalytics.tsx, DB RLS 策略
+
+#### 10. 报告完成通知
+- **现状**：用户需手动刷新 Dashboard 查看报告状态
+- **方案**：
+  - 方案A：利用 Realtime 订阅 contracts 状态变更，前端即时刷新
+  - 方案B：报告完成时触发邮件通知（需 Edge Function + 邮件服务）
+- **涉及**：Dashboard.tsx, 可选 Edge Function
+
+#### 11. 管理员操作日志
+- **现状**：无操作审计记录
+- **方案**：创建 `admin_audit_logs` 表，记录报告创建/编辑/状态变更操作
+- **涉及**：DB migration, AdminReportEditor.tsx
+
+### P3 - SEO与营销优化
+
+#### 12. Landing Page SEO 优化
+- **现状**：index.html 缺少完整的 meta tags、OG 标签
+- **方案**：
+  - 添加 title、description、keywords meta 标签
+  - 添加 OG 和 Twitter Card 标签
+  - 添加 JSON-LD 结构化数据
+- **涉及**：index.html
+
+#### 13. Landing Page A/B 测试支持
+- **现状**：无法区分不同文案/设计的转化效果
+- **方案**：通过 URL 参数控制不同版本的 Hero Section 文案，结合 UTM 追踪转化
+- **涉及**：HeroSection.tsx, waitlist 表
+
+---
+
+## 实施建议
+
+按 P0 → P1 → P2 → P3 顺序逐步优化，每完成一组后进行端到端测试验证。P0 项直接影响 MVP 验证的完整性，应优先处理。
