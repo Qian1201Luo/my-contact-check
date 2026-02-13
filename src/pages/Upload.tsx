@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { useAuth } from "@/hooks/useAuth";
+import { useAgreementGuard } from "@/hooks/useAgreementGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 const Upload = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -15,27 +17,35 @@ const Upload = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
-  const { user } = useAuth();
+  const { checking, user } = useAgreementGuard();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const validateFile = (f: File): boolean => {
+    if (f.type !== "application/pdf") {
+      toast({ title: "文件格式错误", description: "仅支持PDF格式", variant: "destructive" });
+      return false;
+    }
+    if (f.size > MAX_FILE_SIZE) {
+      toast({ title: "文件过大", description: "文件大小不能超过20MB", variant: "destructive" });
+      return false;
+    }
+    return true;
+  };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile?.type === "application/pdf") {
+    if (droppedFile && validateFile(droppedFile)) {
       setFile(droppedFile);
-    } else {
-      toast({ title: "文件格式错误", description: "仅支持PDF格式", variant: "destructive" });
     }
   }, [toast]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
-    if (selected?.type === "application/pdf") {
+    if (selected && validateFile(selected)) {
       setFile(selected);
-    } else {
-      toast({ title: "文件格式错误", description: "仅支持PDF格式", variant: "destructive" });
     }
   };
 

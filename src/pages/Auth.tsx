@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Scale, Mail, Lock, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,6 +103,30 @@ const Auth = () => {
                 {loading ? "处理中..." : isSignUp ? "注册" : "登录"}
               </Button>
             </form>
+            {!isSignUp && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email) {
+                      toast({ title: "请输入邮箱", description: "请先填写邮箱地址再点击找回密码", variant: "destructive" });
+                      return;
+                    }
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                      redirectTo: `${window.location.origin}/reset-password`,
+                    });
+                    if (error) {
+                      toast({ title: "发送失败", description: error.message, variant: "destructive" });
+                    } else {
+                      toast({ title: "邮件已发送", description: "请查收密码重置邮件。" });
+                    }
+                  }}
+                  className="text-sm text-muted-foreground hover:text-primary hover:underline"
+                >
+                  忘记密码？
+                </button>
+              </div>
+            )}
             <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">
                 {isSignUp ? "已有账号？" : "还没有账号？"}

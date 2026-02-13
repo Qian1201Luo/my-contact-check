@@ -14,6 +14,7 @@ import Report from "./pages/Report";
 import AdminQueue from "./pages/AdminQueue";
 import AdminReportEditor from "./pages/AdminReportEditor";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/admin/queue" element={<AdminQueue />} />
             <Route path="/admin/edit/:id" element={<AdminReportEditor />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
